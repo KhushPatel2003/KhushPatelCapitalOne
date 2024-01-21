@@ -25,7 +25,10 @@ function ResponsiveAppBar() {
 
   const handleCloseNavMenu = (page) => {
     if (page === "Github (Source Code)") {
-      window.open("https://github.com/KhushPatel2003", "_blank");
+      window.open(
+        "https://github.com/KhushPatel2003/KhushPatelCapitalOne",
+        "_blank"
+      );
     } else if (page === "LinkedIn") {
       window.open("https://www.linkedin.com/in/khush-patel-uw/", "_blank");
     }
