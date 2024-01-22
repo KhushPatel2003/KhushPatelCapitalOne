@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useState, useEffect} from "react";
+import React, {useState} from "react";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import List from "@mui/material/List";
@@ -19,13 +19,15 @@ const icons = {
   subway: subway.src,
 };
 
-function calculatePoints(transactions) {
-  // SETUP
+function calculatePointsPerTransactions(transactions) {
+  // hm: represents the amount of money spent at each merchant
+  // memo: represents the memoization table for the backtracking algorithm
+  // total: represents the total amount of money spent
   let hm = {sportcheck: 0, tim_hortons: 0, subway: 0};
   let memo = {};
   let total = 0;
 
-  // INITIALIZE HM
+  // This loop will calculate the total amount of money spent at each merchant
   for (const [key, value] of Object.entries(transactions)) {
     if (value["merchant_code"] in hm) {
       hm[value["merchant_code"]] += value["amount_cents"];
@@ -34,16 +36,20 @@ function calculatePoints(transactions) {
     }
     total += value["amount_cents"];
   }
-
+  // This loop will convert cents to dollars
   for (const [key, value] of Object.entries(hm)) {
     hm[key] = Math.floor(value / 100);
   }
 
-  // CALCULATE TOTAL POINTS
+  // [backTracking algorithm] - recursive function that will consdier all possible combinations of
+  // transactions (without doing repeated work by using memoization) and return the maximum amount
+  // of points that can be earned from the transactions
   function backTrack(hm, total) {
+    // base case (no more money left to spend)
     if (total === 0) {
       return 0;
     }
+    // if the current state has already been calculated, return the value (memoization)
     if (memo[JSON.stringify(hm)] !== undefined) {
       return memo[JSON.stringify(hm)];
     }
@@ -118,8 +124,12 @@ function calculatePoints(transactions) {
     }
 
     // RULE 7
-    const rule7Sum = Object.values(hm).reduce((acc, curr) => acc + curr, 0);
+    const rule7Sum = Object.values(hm).reduce(
+      (accumulator, curr) => accumulator + curr,
+      0
+    );
 
+    // since we havn't crossed this path before, we can memoize the result
     memo[JSON.stringify(hm)] = Math.max(currPoints, rule7Sum);
     return memo[JSON.stringify(hm)];
   }
@@ -127,26 +137,42 @@ function calculatePoints(transactions) {
   return backTrack(hm, total);
 }
 
+// This function will calculate the points for each transaction individually
+function calculatePoints(transactions) {
+  let objectOfPointsPerTransaction = {};
+  for (const [key, value] of Object.entries(transactions)) {
+    objectOfPointsPerTransaction[key] = {
+      ...value,
+      points: calculatePointsPerTransactions({[key]: value}),
+    };
+  }
+  return objectOfPointsPerTransaction;
+}
+
 function SplitComponent() {
-  const [points, setPoints] = useState(0);
+  // totalPoints: represents the total amount of points that can be earned from the transactions
+  // jsonInput: represents the user inputted JSON
+  // parsedObject: represents the parsed JSON
+  const [totalPoints, setTotalPoints] = useState(0);
   const [jsonInput, setJSONInput] = useState("");
   const [parsedObject, setParsedObject] = useState(defaultTransactions);
 
+  // This function will calculate the points for the default transactions
   const calPoints = () => {
-    setParsedObject(defaultTransactions);
-    setPoints(calculatePoints(defaultTransactions));
+    setTotalPoints(calculatePointsPerTransactions(defaultTransactions));
+    setParsedObject(calculatePoints(defaultTransactions));
   };
 
+  // this function will compute the user JSON input
   const handleInputChange = (e) => {
     setJSONInput(e.target.value);
   };
-
   const handleParseJSON = () => {
     try {
       const jsonString = jsonInput.replace(/'/g, '"');
       const parsed = JSON.parse(jsonString);
-      setParsedObject(parsed);
-      setPoints(calculatePoints(parsed));
+      setParsedObject(calculatePoints(parsed));
+      setTotalPoints(calculatePointsPerTransactions(parsed));
     } catch (error) {
       console.error("Error parsing JSON:", error);
       setParsedObject(defaultTransactions);
@@ -231,10 +257,14 @@ function SplitComponent() {
                         />
                       </ListItemAvatar>
                       <ListItemText
-                        primary={`${value["merchant_code"]} - \$${
+                        primary={
+                          value["points"]
+                            ? `${value["merchant_code"]}: +${value["points"]} points`
+                            : `${value["merchant_code"]}`
+                        }
+                        secondary={`${value["date"]}: \$${
                           value["amount_cents"] / 100
                         }`}
-                        secondary={value["date"]}
                       />
                     </ListItem>
                   ))
@@ -242,7 +272,7 @@ function SplitComponent() {
             </List>
           </Paper>
           <h3 style={{color: "#3472aa", margin: "10px"}}>
-            Total points earnable: {points}
+            Total points earnable: {totalPoints}
           </h3>
           <Button
             variant="contained"

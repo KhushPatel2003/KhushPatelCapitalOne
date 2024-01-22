@@ -1,6 +1,4 @@
-import Image from "next/image";
 import landingPage from "../assets/landingPage.jpg";
-import c1Logo from "../assets/c1Logo.png";
 
 function LandingPage() {
   return (

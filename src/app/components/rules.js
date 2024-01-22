@@ -1,9 +1,10 @@
 import BasicTable from "./table";
-import Rating from "@mui/material/Rating";
 import tims from "../assets/tims.png";
 import sportsCheck from "../assets/sportsCheck.png";
 import subway from "../assets/subWay.jpg";
 import Avatar from "@mui/material/Avatar";
+import Image from "next/image";
+import venture from "../assets/venture.png";
 import AvatarGroup from "@mui/material/AvatarGroup";
 
 function Rules() {
@@ -36,7 +37,7 @@ function Rules() {
             marginBottom: "1%",
           }}
         >
-          Introducing the Capital One Premier Rewards Card.
+          Introducing the Capital One Venture Rewards Card.
         </h1>
         <p
           style={{
@@ -44,11 +45,13 @@ function Rules() {
             color: "#0d3d6b",
             fontWeight: "100",
             width: "75%",
+            marginBottom: "2%",
           }}
         >
           Every dollar you spend seamlessly transforms into valuable points,
           maximizing your rewards journey with each transaction
         </p>
+        <Image src={venture.src} width={500 / 1.8} height={315 / 1.8} />
         <div
           style={{
             display: "flex",
@@ -67,28 +70,9 @@ function Rules() {
           </AvatarGroup>
         </div>
       </div>
-      <div style={{margin: 20}}>
+      <div style={{margin: 20, marginBottom: 50}}>
         <BasicTable />
       </div>
-      <Rating
-        name="half-rating-read"
-        defaultValue={4.5}
-        precision={0.5}
-        readOnly
-        sx={{marginTop: "3%"}}
-      />
-      <div
-        style={{
-          width: "75%",
-          height: "1px",
-          backgroundColor: "#0d3d6b",
-          alignSelf: "center",
-          borderRadius: "25px",
-          padding: "3",
-          marginBottom: "5%",
-          marginTop: "1%",
-        }}
-      ></div>
     </div>
   );
 }
